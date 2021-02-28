@@ -20,6 +20,17 @@ public class Player : NetworkBehaviour
         }
     }
 
+    //public override void OnStartClient()
+    //{
+    //    CmdRestartGame();
+    //}
+
+    //[Command]
+    //void CmdRestartGame()
+    //{
+    //    Room.EndGame();
+    //}
+
     public override void OnStartLocalPlayer()
     {
         uiRef = Instantiate(playerUI);
