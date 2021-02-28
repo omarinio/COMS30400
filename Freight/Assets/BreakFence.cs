@@ -73,7 +73,6 @@ public class BreakFence : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.P))
         {
             float dist = Vector3.Distance(NetworkClient.connection.identity.transform.position, transform.position);
-            Debug.Log(dist);
             if (dist <= 2.5f)
             {
                 Vector3 spawnPosition = transform.position;

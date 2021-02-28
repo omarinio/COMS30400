@@ -98,7 +98,7 @@ public class SceneObject : NetworkBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             float dist = Vector3.Distance(NetworkClient.connection.identity.transform.position, transform.position);
             if(dist <= 2.5f)
