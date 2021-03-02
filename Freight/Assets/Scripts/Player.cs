@@ -25,6 +25,7 @@ public class Player : NetworkBehaviour
         uiRef = Instantiate(playerUI);
         gesture = PoseParser.GETGestureAsString();
         base.OnStartLocalPlayer();
+        
     }
 
     public void SetPressE()

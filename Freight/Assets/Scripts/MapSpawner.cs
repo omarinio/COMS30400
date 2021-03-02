@@ -161,12 +161,10 @@ public class MapSpawner : NetworkBehaviour
                             if(j == 4)
                             {
                                 trainGo.transform.Find("TrainNumber").gameObject.transform.GetChild(0).transform.GetComponent<TextMeshPro>().text = ("Train number " + "5");
-
                             }
                             else
                             {
                                 trainGo.transform.Find("TrainNumber").gameObject.transform.GetChild(0).transform.GetComponent<TextMeshPro>().text = ("Train number " + j.ToString());
-
                             }
                             Debug.Log("burst train");
                         }
