@@ -34,7 +34,6 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 
     void Start() {
         ObjectToSeeTheLights = GameObject.Find("CameraToSeeTheLights");
-        sceneViewOfTheLights = ObjectToSeeTheLights.GetComponent<CinemachineVirtualCamera>();
         ObjectToSeeTheLights.SetActive(false);
         Debug.Log(ObjectToSeeTheLights);
     }
@@ -376,15 +375,24 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
             lightsOff.SetActive(false);
         }
     }
-    
-     IEnumerator ExampleCoroutine(Switchable Item)
+
+    [PunRPC]
+    void changeTheCamera() {
+
+    }
+
+    [PunRPC]
+     IEnumerator ExampleCoroutine(int ItemId)
     {
+        
+        GameObject Item = PhotonView.Find(ItemId).gameObject;
         GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
         ObjectToSeeTheLights.SetActive(true);
         yield return new WaitForSeconds(3);
         foreach (var light in spinningLights)
         {
-            photonView.RPC(nameof(TurnOffLight), RpcTarget.All, light.transform.GetComponent<PhotonView>().ViewID, Item.transform.GetComponent<PhotonView>().ViewID);
+            //photonView.RPC(nameof(TurnOffLight), RpcTarget.All, light.transform.GetComponent<PhotonView>().ViewID, Item.transform.GetComponent<PhotonView>().ViewID);
+            TurnOffLight(light.transform.GetComponent<PhotonView>().ViewID, Item.transform.GetComponent<PhotonView>().ViewID);
         }
         yield return new WaitForSeconds(1);
         ObjectToSeeTheLights.SetActive(false);
@@ -395,9 +403,11 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
         //camera.transform.GetChild(0).GetComponent<CinemachineVirtualCamera>().MoveToTopOfPrioritySubqueue();
          yield break;
     }
-    public void SwitchOff(Switchable Item)
+
+    [PunRPC]
+    public void SwitchOffRpc(int Item)
     {
-         StartCoroutine(ExampleCoroutine(Item));
+         StartCoroutine(ExampleCoroutine(Item.transform.GetComponent<PhotonView>().ViewID));
         //CameraToSeeTheLights
         /*GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
         sceneViewOfTheLights.enabled = true;
@@ -407,4 +417,19 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
             photonView.RPC(nameof(TurnOffLight), RpcTarget.All, light.transform.GetComponent<PhotonView>().ViewID, Item.transform.GetComponent<PhotonView>().ViewID);
         }*/
     }
+
+     public void SwitchOff(Switchable Item)
+    {
+         photonView.RPC(nameof(SwitchOffRpc), Item.transform.GetComponent<PhotonView>().ViewID);
+        //CameraToSeeTheLights
+        /*GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
+        sceneViewOfTheLights.enabled = true;
+        
+        foreach (var light in spinningLights)
+        {
+            photonView.RPC(nameof(TurnOffLight), RpcTarget.All, light.transform.GetComponent<PhotonView>().ViewID, Item.transform.GetComponent<PhotonView>().ViewID);
+        }*/
+    }
+
+
 }
