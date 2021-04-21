@@ -382,7 +382,7 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     }
 
     [PunRPC]
-     IEnumerator ExampleCoroutine(int ItemId)
+    IEnumerator ExampleCoroutine(int ItemId)
     {
         
         GameObject Item = PhotonView.Find(ItemId).gameObject;
@@ -397,17 +397,16 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
         yield return new WaitForSeconds(1);
         ObjectToSeeTheLights.SetActive(false);
         camera.transform.GetChild(1).gameObject.SetActive(true);
-        Debug.Log(camera.transform.GetChild(1).gameObject);
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(2f);
         camera.transform.GetChild(1).gameObject.SetActive(false);
-        //camera.transform.GetChild(0).GetComponent<CinemachineVirtualCamera>().MoveToTopOfPrioritySubqueue();
-         yield break;
+        yield break;
     }
 
     [PunRPC]
-    public void SwitchOffRpc(int Item)
+    public void SwitchOffRpc(int ItemId)
     {
-         StartCoroutine(ExampleCoroutine(Item.transform.GetComponent<PhotonView>().ViewID));
+        GameObject Item = PhotonView.Find(ItemId).gameObject;
+        StartCoroutine(ExampleCoroutine(Item.transform.GetComponent<PhotonView>().ViewID));
         //CameraToSeeTheLights
         /*GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
         sceneViewOfTheLights.enabled = true;
@@ -420,7 +419,7 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
 
      public void SwitchOff(Switchable Item)
     {
-         photonView.RPC(nameof(SwitchOffRpc), Item.transform.GetComponent<PhotonView>().ViewID);
+         photonView.RPC(nameof(SwitchOffRpc), RpcTarget.All, Item.transform.GetComponent<PhotonView>().ViewID);
         //CameraToSeeTheLights
         /*GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
         sceneViewOfTheLights.enabled = true;
