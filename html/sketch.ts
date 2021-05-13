@@ -4,6 +4,11 @@
 // https://youtu.be/OIo-DIOkNVg
 // https://editor.p5js.org/codingtrain/sketches/ULA97pJXR
 
+import * as comlink from "comlink";
+import * as tf from '@tensorflow/tfjs';
+import * as posenet from '@tensorflow-models/posenet';
+import * as p5 from './p5.min.js';
+import * as ml5 from 'ml5';
 
 var canvas
 

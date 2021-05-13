@@ -8,6 +8,14 @@ let ctx: CanvasRenderingContext2D | null = null;
 let canvasSizeX = 320
 let canvasSizeY = 240
 
+let poseOff = false;
+
+let pose1;
+let pose2;
+let pose3;
+
+let poseLag = 0;
+
 
 //image buffer
 const imageBufferCanvas = new OffscreenCanvas(canvasSizeX, canvasSizeY);
@@ -16,30 +24,30 @@ const imageBufferContext = (imageBufferCanvas.getContext(
   ) as any) as CanvasRenderingContext2D;
   console.time("[worker] start alie");
 
-function setup() {
-// init canvas
-    canvas.parent('unityContainer');
-    canvas.position(0, 0);
-    // init posenet
-    var optionsPose = {
-        architecture: 'ResNet50',
-        imageScaleFactor: 1,
-        outputStride: 16,
-        // flipHorizontal: false,
-        minConfidence: 0.2,
-        maxPoseDetections: 1,
-        scoreThreshold: 0.2,
-        nmsRadius: 1,
-        // detectionType: 'single',
-        inputResolution: 257,
-        multiplier: 1.0,
-        quantBytes: 4,
-    };
+// function setup() {
+// // init canvas
+//     canvas.parent('unityContainer');
+//     canvas.position(0, 0);
+//     // init posenet
+//     var optionsPose = {
+//         architecture: 'ResNet50',
+//         imageScaleFactor: 1,
+//         outputStride: 16,
+//         // flipHorizontal: false,
+//         minConfidence: 0.2,
+//         maxPoseDetections: 1,
+//         scoreThreshold: 0.2,
+//         nmsRadius: 1,
+//         // detectionType: 'single',
+//         inputResolution: 257,
+//         multiplier: 1.0,
+//         quantBytes: 4,
+//     };
   
 
-    // init overlay
-    //overlay = loadImage('overlays/new.png');
-}
+//     // init overlay
+//     //overlay = loadImage('overlays/new.png');
+// }
 
 function noseLabel() {
     if (!poseOff) {
@@ -106,6 +114,20 @@ function handsLabel() {
 
 comlink.expose({
     async init(canvas: OffscreenCanvas) {
+        var optionsPose = {
+            architecture: 'ResNet50',
+            imageScaleFactor: 1,
+            outputStride: 16,
+            // flipHorizontal: false,
+            minConfidence: 0.2,
+            maxPoseDetections: 1,
+            scoreThreshold: 0.2,
+            nmsRadius: 1,
+            // detectionType: 'single',
+            inputResolution: 257,
+            multiplier: 1.0,
+            quantBytes: 4,
+        };
         console.time("[worker] load-model");
         net = await posenet.load();
         console.timeEnd("[worker] load-model");
