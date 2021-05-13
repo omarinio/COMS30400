@@ -29,12 +29,12 @@ let poseLag = 0;
 
 function setup() {
     // init canvas
-    canvas = createCanvas(320, 240);
+    canvas = p5.createCanvas(320, 240);
     canvas.parent('unityContainer');
     canvas.position(0, 0);
 
     // init video
-    video = createCapture(VIDEO);
+    video = p5.createCapture(VIDEO);
     video.hide();
 
     // init posenet

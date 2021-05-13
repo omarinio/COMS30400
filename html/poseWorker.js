@@ -3,8 +3,7 @@ import * as comlink from "comlink";
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import * as p5 from './p5.min.js';
-let net: posenet.PoseNet | null = null;
-let ctx: CanvasRenderingContext2D | null = null;
+
 let canvasSizeX = 320
 let canvasSizeY = 240
 
@@ -21,7 +20,7 @@ let poseLag = 0;
 const imageBufferCanvas = new OffscreenCanvas(canvasSizeX, canvasSizeY);
 const imageBufferContext = (imageBufferCanvas.getContext(
     "2d"
-  ) as any) as CanvasRenderingContext2D;
+  ));
   console.time("[worker] start alie");
 
 // function setup() {
@@ -113,7 +112,7 @@ function handsLabel() {
 
 
 comlink.expose({
-    async init(canvas: OffscreenCanvas) {
+    async init(canvas) {
         var optionsPose = {
             architecture: 'ResNet50',
             imageScaleFactor: 1,
@@ -131,15 +130,15 @@ comlink.expose({
         console.time("[worker] load-model");
         net = await posenet.load();
         console.timeEnd("[worker] load-model");
-        ctx = canvas.getContext("2d") as any;
+        ctx = canvas.getContext("2d");
         console.time("[worker] ready");
     },
-    async update(bitmap: ImageBitmap) {
+    async update(bitmap) {
         if (net != null && ctx) {
         imageBufferContext.drawImage(bitmap, 0, 0);
 
         const t0 = performance.now();
-        const data = await net.estimateSinglePose(imageBufferCanvas as any);
+        const data = await net.estimateSinglePose(imageBufferCanvas);
         console.log("classification: ", performance.now() - t0);
         console.log("data: ", data);
         return data;
