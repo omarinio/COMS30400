@@ -42,7 +42,6 @@ const imageBufferContext = (imageBufferCanvas.getContext(
 }
 
 function noseLabel() {
-    
     if (!poseOff) {
         // normalise nose position e.g. 0<x,y<1
         var normNosePos = p5.createVector(pose1.nose.x / (2 * p5.width), pose1.nose.y / (2 * p5.height));
