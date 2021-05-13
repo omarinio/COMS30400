@@ -59,35 +59,12 @@ function modelLoaded() {
     console.log('poseNet ready');
 }
 
-const setupModel = async function() {
-        if (window.Worker) {
-            webWorker = new Worker('web-worker.js');
-            webWorker.onmessage = evt => {
-                isWaiting = !isWaiting;
-                if (evt.modelIsReady) {
-                    workerModelIsReady = true;
-                }
-                console.log(evt.data);
-            }
-        } else {
-            try {
-                model = await tf.loadGraphModel(MODEL_URL, { fromTFHub: true });
-                const response = await tf.util.fetch(DICT_URL);
-                const text = await response.text();
-                dictionary = text.trim().split('\n');
-            } catch (err) {
-                console.error("Can't load model: ", err)
-            }
-            const zeros = tf.zeros([1, 224, 224, 3]);
-            // warm-up the model
-            model.predict(zeros);
-        }
-    }
-    // Checks for head position
-    // Gesture given based on what third of the window the nose is withing according to
-    // |N|N|N|
-    // |O|N|I|
-    // |Q|C|W|
+
+// Checks for head position
+// Gesture given based on what third of the window the nose is withing according to
+// |N|N|N|
+// |O|N|I|
+// |Q|C|W|
 function noseLabel() {
     if (!poseOff) {
         // normalise nose position e.g. 0<x,y<1
