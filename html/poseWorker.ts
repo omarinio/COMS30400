@@ -2,7 +2,7 @@
 import * as comlink from "comlink";
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
-import * as p5 from "p5.js"
+import p5 from "p5";
 let net: posenet.PoseNet | null = null;
 let ctx: CanvasRenderingContext2D | null = null;
 let canvasSizeX = 320
@@ -42,10 +42,9 @@ const imageBufferContext = (imageBufferCanvas.getContext(
 }
 
 function noseLabel() {
-    
     if (!poseOff) {
         // normalise nose position e.g. 0<x,y<1
-        var normNosePos = p5.createVector(pose1.nose.x / (2 * width), pose1.nose.y / (2 * height));
+        var normNosePos = createVector(pose1.nose.x / (2 * p5.width), pose1.nose.y / (2 * p5.height));
         if (normNosePos.x > 1 / 3 && normNosePos.x < 2 / 3 && normNosePos.y > 0.2 && normNosePos.y < 0.4) {
             return 'F';
         } else if (normNosePos.x > 0 && normNosePos.x < 0.37 && normNosePos.y > 1 / 3 && normNosePos.y < 2 / 3) {
@@ -67,12 +66,12 @@ function noseLabel() {
 
 function handsLabel() {
     if (!poseOff) {
-        if (pose1.leftWrist.x < width * 2 && pose1.leftWrist.x > 0 && pose1.leftWrist.y < height * 2 && pose1.leftWrist.y > 0) {
+        if (pose1.leftWrist.x < p5.width * 2 && pose1.leftWrist.x > 0 && pose1.leftWrist.y < p5.height * 2 && pose1.leftWrist.y > 0) {
             //if(pose3.leftWrist.confidence>0.7 && pose3.rightWrist.confidence>0.7){
             // normalise wrist positions e.g. 0<x,y<1
-            var normLeftWristVector = p5.createVector((pose3.leftWrist.x - pose1.leftWrist.x) / (2 * width), (pose3.leftWrist.y - pose1.leftWrist.y) / (2 * height));
-            var normRightWristVector = p5.createVector((pose3.rightWrist.x - pose1.rightWrist.x) / (2 * width), (pose3.rightWrist.y - pose1.rightWrist.y) / (2 * width));
-            var normLeftWristPos = p5.createVector(pose1.leftWrist.x / (2 * width), pose1.leftWrist.y / (2 * height));
+            var normLeftWristVector = p5.createVector((pose3.leftWrist.x - pose1.leftWrist.x) / (2 * p5.width), (pose3.leftWrist.y - pose1.leftWrist.y) / (2 * p5.height));
+            var normRightWristVector = p5.createVector((pose3.rightWrist.x - pose1.rightWrist.x) / (2 * p5.width), (pose3.rightWrist.y - pose1.rightWrist.y) / (2 * p5.width));
+            var normLeftWristPos = p5.createVector(pose1.leftWrist.x / (2 * p5.width), pose1.leftWrist.y / (2 * p5.height));
             if (normLeftWristVector.x < -0.1) {
                 // Pick up, both hands moving up
                 poseLag = 3;
