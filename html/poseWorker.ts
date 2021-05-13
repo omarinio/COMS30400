@@ -16,8 +16,8 @@ const imageBufferContext = (imageBufferCanvas.getContext(
   ) as any) as CanvasRenderingContext2D;
   console.time("[worker] start alie");
 
-  function setup() {
-    // init canvas
+function setup() {
+// init canvas
     canvas.parent('unityContainer');
     canvas.position(0, 0);
     // init posenet
@@ -102,23 +102,25 @@ function handsLabel() {
     }
     return 'N';
 }
-  comlink.expose({
+
+
+comlink.expose({
     async init(canvas: OffscreenCanvas) {
-      console.time("[worker] load-model");
-      net = await posenet.load();
-      console.timeEnd("[worker] load-model");
-      ctx = canvas.getContext("2d") as any;
-      console.time("[worker] ready");
+        console.time("[worker] load-model");
+        net = await posenet.load();
+        console.timeEnd("[worker] load-model");
+        ctx = canvas.getContext("2d") as any;
+        console.time("[worker] ready");
     },
     async update(bitmap: ImageBitmap) {
-      if (net != null && ctx) {
+        if (net != null && ctx) {
         imageBufferContext.drawImage(bitmap, 0, 0);
-  
+
         const t0 = performance.now();
         const data = await net.estimateSinglePose(imageBufferCanvas as any);
         console.log("classification: ", performance.now() - t0);
         console.log("data: ", data);
         return data;
-      }
+        }
     },
-  });
+});

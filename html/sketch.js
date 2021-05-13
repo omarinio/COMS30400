@@ -53,6 +53,33 @@ function setup() {
 
     // init overlay
     overlay = loadImage('overlays/new.png');
+
+    main();
+}
+
+async function main() {
+    console.time("[main] worker setup");
+    const worker = new Worker("./poseWorker.ts", { type: "module" });
+    const api = await comlink.wrap(worker);
+    await api.init(comlink.transfer(offscreenCanvas, [offscreenCanvas]));
+    console.timeEnd("[main] worker setup");
+
+    async function mainloop() {
+        offCtx.drawImage(video, 0, 0);
+        const bitmap = offscreen.transferToImageBitmap();
+        const data = await api.update(comlink.transfer(bitmap, [bitmap]));
+    
+        const el = document.getElementById("classification-classes");
+    
+        if (el && el.textContent) {
+          el.innerHTML = data.length > 0 ? data[0].class : "Nothing found";
+        }
+    
+        await new Promise((r) => setTimeout(r, 500));
+    
+        requestAnimationFrame(mainloop);
+    }
+    mainloop();
 }
 
 function modelLoaded() {
