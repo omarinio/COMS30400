@@ -1,8 +1,16 @@
 //import * as comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
-import * as comlink from "comlink";
+//import * as comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
-import * as p5 from './p5.min.js';
+//import * as p5 from './p5.min.js';
+//import * as p5 from "https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"
+
+
+//happens syncronously
+importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
+importScripts("https://unpkg.com/ml5@0.3.1/dist/ml5.min.js");
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js");
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js");
 
 let canvasSizeX = 320
 let canvasSizeY = 240
@@ -14,14 +22,14 @@ let pose2;
 let pose3;
 
 let poseLag = 0;
-
+importScripts('sketch.js');
 
 //image buffer
 const imageBufferCanvas = new OffscreenCanvas(canvasSizeX, canvasSizeY);
 const imageBufferContext = (imageBufferCanvas.getContext(
     "2d"
-  ));
-  console.time("[worker] start alie");
+));
+console.time("[worker] start alie");
 
 // function setup() {
 // // init canvas
@@ -42,7 +50,7 @@ const imageBufferContext = (imageBufferCanvas.getContext(
 //         multiplier: 1.0,
 //         quantBytes: 4,
 //     };
-  
+
 
 //     // init overlay
 //     //overlay = loadImage('overlays/new.png');
@@ -135,13 +143,13 @@ comlink.expose({
     },
     async update(bitmap) {
         if (net != null && ctx) {
-        imageBufferContext.drawImage(bitmap, 0, 0);
+            imageBufferContext.drawImage(bitmap, 0, 0);
 
-        const t0 = performance.now();
-        const data = await net.estimateSinglePose(imageBufferCanvas);
-        console.log("classification: ", performance.now() - t0);
-        console.log("data: ", data);
-        return data;
+            const t0 = performance.now();
+            const data = await net.estimateSinglePose(imageBufferCanvas);
+            console.log("classification: ", performance.now() - t0);
+            console.log("data: ", data);
+            return data;
         }
     },
 });

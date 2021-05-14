@@ -4,12 +4,10 @@
 // https://youtu.be/OIo-DIOkNVg
 // https://editor.p5js.org/codingtrain/sketches/ULA97pJXR
 
-import * as comlink from "comlink";
-import * as tf from '@tensorflow/tfjs';
-import * as posenet from '@tensorflow-models/posenet';
-import * as p5 from './p5.min.js';
-import * as ml5 from 'ml5';
+//import * as comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 
+//think this is fine
+import * as comlink from "comlink";
 var canvas
 
 let textSiz = 20;
@@ -27,6 +25,8 @@ let pose3;
 let poseSentence = "";
 let poseLag = 0;
 
+
+//should be done here and transferred as a fake canvas
 function setup() {
     // init canvas
     canvas = p5.createCanvas(320, 240);
@@ -37,7 +37,7 @@ function setup() {
     video = p5.createCapture(VIDEO);
     video.hide();
 
-    // init posenet
+    // init posenet // should be done inworker
     var optionsPose = {
         architecture: 'ResNet50',
         imageScaleFactor: 1,
@@ -73,15 +73,15 @@ async function main() {
         offCtx.drawImage(video, 0, 0);
         const bitmap = offscreen.transferToImageBitmap();
         const data = await api.update(comlink.transfer(bitmap, [bitmap]));
-    
+
         const el = document.getElementById("classification-classes");
-    
+
         if (el && el.textContent) {
-          el.innerHTML = data.length > 0 ? data[0].class : "Nothing found";
+            el.innerHTML = data.length > 0 ? data[0].class : "Nothing found";
         }
-    
+
         await new Promise((r) => setTimeout(r, 500));
-    
+
         requestAnimationFrame(mainloop);
     }
     mainloop();
@@ -97,6 +97,7 @@ function modelLoaded() {
 // |N|N|N|
 // |O|N|I|
 // |Q|C|W|
+/*
 function noseLabel() {
     if (!poseOff) {
         // normalise nose position e.g. 0<x,y<1
@@ -157,7 +158,7 @@ function handsLabel() {
         }
     }
     return 'N';
-}
+}*/
 
 // Called by gotPoses
 // Only updates pose when confidence is high enough and
