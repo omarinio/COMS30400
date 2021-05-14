@@ -37,25 +37,6 @@ function setup() {
     video = p5.createCapture(VIDEO);
     video.hide();
 
-    // init posenet // should be done inworker
-    var optionsPose = {
-        architecture: 'ResNet50',
-        imageScaleFactor: 1,
-        outputStride: 16,
-        // flipHorizontal: false,
-        minConfidence: 0.2,
-        maxPoseDetections: 1,
-        scoreThreshold: 0.2,
-        nmsRadius: 1,
-        // detectionType: 'single',
-        inputResolution: 257,
-        multiplier: 1.0,
-        quantBytes: 4,
-    };
-
-    poseNet = ml5.poseNet(video, optionsPose, modelLoaded);
-    poseNet.on('pose', gotPoses);
-
     // init overlay
     overlay = loadImage('overlays/new.png');
 
@@ -64,7 +45,7 @@ function setup() {
 
 async function main() {
     console.time("[main] worker setup");
-    const worker = new Worker("./poseWorker.ts", { type: "module" });
+    const worker = new Worker("./poseWorker.js");
     const api = await comlink.wrap(worker);
     await api.init(comlink.transfer(offscreenCanvas, [offscreenCanvas]));
     console.timeEnd("[main] worker setup");
@@ -72,179 +53,15 @@ async function main() {
     async function mainloop() {
         offCtx.drawImage(video, 0, 0);
         const bitmap = offscreen.transferToImageBitmap();
+
+        //data is pose label
         const data = await api.update(comlink.transfer(bitmap, [bitmap]));
-
-        const el = document.getElementById("classification-classes");
-
-        if (el && el.textContent) {
-            el.innerHTML = data.length > 0 ? data[0].class : "Nothing found";
-        }
-
-        await new Promise((r) => setTimeout(r, 500));
-
         requestAnimationFrame(mainloop);
     }
     mainloop();
 }
 
-function modelLoaded() {
-    console.log('poseNet ready');
-}
 
-
-// Checks for head position
-// Gesture given based on what third of the window the nose is withing according to
-// |N|N|N|
-// |O|N|I|
-// |Q|C|W|
-/*
-function noseLabel() {
-    if (!poseOff) {
-        // normalise nose position e.g. 0<x,y<1
-        var normNosePos = createVector(pose1.nose.x / (2 * width), pose1.nose.y / (2 * height));
-        if (normNosePos.x > 1 / 3 && normNosePos.x < 2 / 3 && normNosePos.y > 0.2 && normNosePos.y < 0.4) {
-            return 'F';
-        } else if (normNosePos.x > 0 && normNosePos.x < 0.37 && normNosePos.y > 1 / 3 && normNosePos.y < 2 / 3) {
-            return 'I';
-        } else if (normNosePos.x > 0.62 && normNosePos.x < 1 && normNosePos.y > 1 / 3 && normNosePos.y < 2 / 3) {
-            return 'O';
-        } else if (normNosePos.x > 0 && normNosePos.x < 1 / 3 && normNosePos.y > 2 / 3 && normNosePos.y < 1) {
-            return 'W';
-        } else if (normNosePos.x > 2 / 3 && normNosePos.x < 1 && normNosePos.y > 2 / 3 && normNosePos.y < 1) {
-            return 'Q';
-        } else if (normNosePos.x > 1 / 3 && normNosePos.x < 2 / 3 && normNosePos.y > 2 / 3 && normNosePos.y < 1) {
-            return 'C';
-        } else {
-            return 'N';
-        }
-    }
-    return 'N';
-}
-
-function handsLabel() {
-    if (!poseOff) {
-        if (pose1.leftWrist.x < width * 2 && pose1.leftWrist.x > 0 && pose1.leftWrist.y < height * 2 && pose1.leftWrist.y > 0) {
-            //if(pose3.leftWrist.confidence>0.7 && pose3.rightWrist.confidence>0.7){
-            // normalise wrist positions e.g. 0<x,y<1
-            var normLeftWristVector = createVector((pose3.leftWrist.x - pose1.leftWrist.x) / (2 * width), (pose3.leftWrist.y - pose1.leftWrist.y) / (2 * height));
-            var normRightWristVector = createVector((pose3.rightWrist.x - pose1.rightWrist.x) / (2 * width), (pose3.rightWrist.y - pose1.rightWrist.y) / (2 * width));
-            var normLeftWristPos = createVector(pose1.leftWrist.x / (2 * width), pose1.leftWrist.y / (2 * height));
-            if (normLeftWristVector.x < -0.1) {
-                // Pick up, both hands moving up
-                poseLag = 3;
-                return "B";
-            } else if ((normLeftWristVector.x > 0.07 && normRightWristVector.x < -0.07)) {
-                // Pull apart, both hands moving apart
-                poseLag = 4;
-                return 'P';
-            } else if (normLeftWristVector.y > 0.07 && normRightWristVector.y > 0.07) {
-                // Pull up, both hands moving down
-                poseLag = 2;
-                return "U";
-
-                // }else if (normLeftWristPos.x>2/3 && normLeftWristPos.x<1 && normLeftWristPos.y>0.2 && normLeftWristPos.y<0.8) {
-                //     // Move forward, left hand up
-                //     return "F";
-            } else if (normLeftWristVector.y > 0.4) {
-                return "R";
-            } else if ((normLeftWristVector.y > 0.1 && normRightWristVector.y < -0.1) || (normLeftWristVector.y < -0.1 && normRightWristVector.y > 0.1)) {
-                // Ladder climb, hands moving in opposite directions
-                poseLag = 12;
-                return 'L';
-            } else {
-                return 'N';
-            }
-            //}
-        }
-    }
-    return 'N';
-}*/
-
-// Called by gotPoses
-// Only updates pose when confidence is high enough and
-// previous pose lag has finished
-function gotResult() {
-
-    poseLag--;
-
-    var tempPoseLabel = poseLabel;
-
-    if (poseLag < 0) {
-        tempPoseLabel = noseLabel();
-        if (tempPoseLabel == 'N') {
-            tempPoseLabel = handsLabel();
-        }
-    }
-
-    // Change displayed pose phrase
-    if (tempPoseLabel !== poseLabel) {
-        poseLabel = tempPoseLabel;
-        // console.log("change");
-        switch (tempPoseLabel) {
-            case 'N':
-                poseSentence = "No Action";
-                break;
-            case 'U':
-                poseSentence = "Pull Up";
-                break;
-            case 'B':
-                poseSentence = "Pick Up";
-                break;
-            case 'L':
-                poseSentence = "Ladder Climb";
-                break;
-            case 'P':
-                poseSentence = "Pull Apart";
-                break;
-            case 'I':
-                poseSentence = "Lean Right";
-                break;
-            case 'O':
-                poseSentence = "Lean Left";
-                break;
-            case 'W':
-                poseSentence = "Lie Right";
-                break;
-            case 'Q':
-                poseSentence = "Lie Left";
-                break;
-            case 'C':
-                poseSentence = "Crouch";
-                break;
-            case 'F':
-                poseSentence = "Move Forward";
-                break;
-            case "R":
-                poseSentence = "Throw";
-                break;
-            default:
-                poseSentence = "";
-        }
-    }
-
-
-}
-
-// Callback from poseNet
-// Populates all 3 pose variabless and calls pose classification
-function gotPoses(poses) {
-    if (poses.length > 0) {
-        pose = poses[0].pose;
-        skeleton = poses[0].skeleton;
-
-        if (!poseSet) {
-            pose1 = pose;
-            pose2 = pose;
-            pose3 = pose;
-            poseSet = true;
-        } else {
-            pose1 = pose2;
-            pose2 = pose3;
-            pose3 = pose;
-        }
-    }
-    gotResult();
-}
 
 // Called by Unity
 // Loads overlay
@@ -268,33 +85,6 @@ function turnOffPose() {
         poseOff = true;
         remove();
     }
-    // remove();
-    // console.log("TURN OFF");
-    //
-    // const videoDoc = document.querySelector('video');
-    //
-    // // A video's MediaStream object is available through its srcObject attribute
-    // const mediaStream = videoDoc.srcObject;
-    //
-    // // Through the MediaStream, you can get the MediaStreamTracks with getTracks():
-    // const tracks = mediaStream.getTracks();
-    //
-    // // Tracks are returned as an array, so if you know you only have one, you can stop it with:
-    // tracks[0].stop();
-    //
-    // // Or stop all like so:
-    // tracks.forEach(track => track.stop())
-    //
-    //
-    //
-    //
-    // poseNet.removeListener('pose', gotPoses);
-    // clearOverlay();
-    // video.remove();
-    // clear();
-    // canvas.remove();
-    // noLoop();
-    // poseOff = true;
 }
 
 let n = 30;

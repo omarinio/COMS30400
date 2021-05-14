@@ -11,6 +11,7 @@ importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 importScripts("https://unpkg.com/ml5@0.3.1/dist/ml5.min.js");
 importScripts("https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js");
 importScripts("https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js");
+importScripts('sketch.js');
 
 let canvasSizeX = 320
 let canvasSizeY = 240
@@ -20,9 +21,9 @@ let poseOff = false;
 let pose1;
 let pose2;
 let pose3;
-
+let poseSentence = "";
 let poseLag = 0;
-importScripts('sketch.js');
+
 
 //image buffer
 const imageBufferCanvas = new OffscreenCanvas(canvasSizeX, canvasSizeY);
@@ -31,34 +32,71 @@ const imageBufferContext = (imageBufferCanvas.getContext(
 ));
 console.time("[worker] start alie");
 
-// function setup() {
-// // init canvas
-//     canvas.parent('unityContainer');
-//     canvas.position(0, 0);
-//     // init posenet
-//     var optionsPose = {
-//         architecture: 'ResNet50',
-//         imageScaleFactor: 1,
-//         outputStride: 16,
-//         // flipHorizontal: false,
-//         minConfidence: 0.2,
-//         maxPoseDetections: 1,
-//         scoreThreshold: 0.2,
-//         nmsRadius: 1,
-//         // detectionType: 'single',
-//         inputResolution: 257,
-//         multiplier: 1.0,
-//         quantBytes: 4,
-//     };
+function gotResult() {
+
+    poseLag--;
+
+    var tempPoseLabel = poseLabel;
+
+    if (poseLag < 0) {
+        tempPoseLabel = noseLabel();
+        if (tempPoseLabel == 'N') {
+            tempPoseLabel = handsLabel();
+        }
+    }
+
+    // Change displayed pose phrase
+    if (tempPoseLabel !== poseLabel) {
+        poseLabel = tempPoseLabel;
+        // console.log("change");
+        switch (tempPoseLabel) {
+            case 'N':
+                poseSentence = "No Action";
+                break;
+            case 'U':
+                poseSentence = "Pull Up";
+                break;
+            case 'B':
+                poseSentence = "Pick Up";
+                break;
+            case 'L':
+                poseSentence = "Ladder Climb";
+                break;
+            case 'P':
+                poseSentence = "Pull Apart";
+                break;
+            case 'I':
+                poseSentence = "Lean Right";
+                break;
+            case 'O':
+                poseSentence = "Lean Left";
+                break;
+            case 'W':
+                poseSentence = "Lie Right";
+                break;
+            case 'Q':
+                poseSentence = "Lie Left";
+                break;
+            case 'C':
+                poseSentence = "Crouch";
+                break;
+            case 'F':
+                poseSentence = "Move Forward";
+                break;
+            case "R":
+                poseSentence = "Throw";
+                break;
+            default:
+                poseSentence = "";
+        }
+    }
 
 
-//     // init overlay
-//     //overlay = loadImage('overlays/new.png');
-// }
+}
 
 function noseLabel() {
     if (!poseOff) {
-        // normalise nose position e.g. 0<x,y<1
+
         var normNosePos = p5.createVector(pose1.nose.x / (2 * p5.width), pose1.nose.y / (2 * p5.height));
         if (normNosePos.x > 1 / 3 && normNosePos.x < 2 / 3 && normNosePos.y > 0.2 && normNosePos.y < 0.4) {
             return 'F';
@@ -118,6 +156,7 @@ function handsLabel() {
     return 'N';
 }
 
+let poseNet;
 
 comlink.expose({
     async init(canvas) {
@@ -135,21 +174,37 @@ comlink.expose({
             multiplier: 1.0,
             quantBytes: 4,
         };
-        console.time("[worker] load-model");
-        net = await posenet.load();
-        console.timeEnd("[worker] load-model");
-        ctx = canvas.getContext("2d");
-        console.time("[worker] ready");
+        poseNet = ml5.poseNet(optionsPose, 'single');
+        //console.time("[worker] load-model");
+        // net = await posenet.load();
+        //console.timeEnd("[worker] load-model");
+        //  ctx = canvas.getContext("2d");
+        // console.time("[worker] ready");
     },
     async update(bitmap) {
         if (net != null && ctx) {
             imageBufferContext.drawImage(bitmap, 0, 0);
-
-            const t0 = performance.now();
-            const data = await net.estimateSinglePose(imageBufferCanvas);
-            console.log("classification: ", performance.now() - t0);
-            console.log("data: ", data);
-            return data;
+            poseNet.singlePose(imageBufferContext, gotPoses);
+            data = poseLabel;
         }
     },
 });
+
+function gotPoses(poses) {
+    if (poses.length > 0) {
+        pose = poses[0].pose;
+        skeleton = poses[0].skeleton;
+
+        if (!poseSet) {
+            pose1 = pose;
+            pose2 = pose;
+            pose3 = pose;
+            poseSet = true;
+        } else {
+            pose1 = pose2;
+            pose2 = pose3;
+            pose3 = pose;
+        }
+    }
+    gotResult();
+}
