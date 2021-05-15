@@ -248,6 +248,8 @@ public class ItemInteraction : MonoBehaviourPun
 
         interactableObject = GetClosestInteractable();
 
+        Debug.Log(interactableObject);
+
         if (canInteract)
         {
             Interactable newInteractable = null;
