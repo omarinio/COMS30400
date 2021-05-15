@@ -91,6 +91,17 @@ public class ItemInteraction : MonoBehaviourPun
         if (other.tag == "Outline")
         {
             other.transform.parent.GetComponent<Outline>().enabled = true;
+            if (other.transform.parent.gameObject?.GetComponent<PickUpable>())
+            {
+                if (tooltip)
+                {
+                    Quaternion objRot = transform.rotation;
+                    GameObject playerTooltip = Instantiate(tooltipObject, new Vector3(other.transform.position.x, other.transform.position.y + 5, other.transform.position.z), Quaternion.Euler(objRot.eulerAngles));
+                    playerTooltip.GetComponent<Tooltip>().Player = gameObject;
+                    tooltip = false;
+                }
+            }
+
         }
     }
 
@@ -420,7 +431,9 @@ public class ItemInteraction : MonoBehaviourPun
                 currentInteractable.PrimaryInteractionOff(character);
                 currentInteractable.GetComponent<Outline>().enabled = true;
                 SetPressEToActive();
+                interactablesInRange.Add(currentInteractable.gameObject);
                 currentInteractable = null;
+                
             }
             else
 
