@@ -25,12 +25,8 @@ public class ItemInteraction : MonoBehaviourPun
     [SerializeField]
     private GameObject textDrop;
 
-    private GameObject rocks;
-
     private GameObject interactableObject;
-    private GameObject interactables;
 
-    private int tooltipCount;
 
     private bool handsActive = false;
 
@@ -38,8 +34,6 @@ public class ItemInteraction : MonoBehaviourPun
 
     private List<GameObject> interactablesInRange = new List<GameObject>();
 
-    public GameObject localRock;
-    public GameObject handGrab;
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +44,6 @@ public class ItemInteraction : MonoBehaviourPun
         }
         cinemachineBrain = Camera.GetComponent<CinemachineBrain>();
         character = GetComponent<Character>();
-        tooltipCount = 0;
         tooltip = true;
     }
 
