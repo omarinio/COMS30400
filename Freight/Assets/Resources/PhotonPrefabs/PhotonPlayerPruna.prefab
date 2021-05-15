@@ -2824,6 +2824,8 @@ MonoBehaviour:
   leftHand: {fileID: 8885500367333761130}
   rightHand: {fileID: 9116709639416634425}
   textDrop: {fileID: 0}
+  localRock: {fileID: 0}
+  handGrab: {fileID: 0}
 --- !u!114 &7592905597476877526
 MonoBehaviour:
   m_ObjectHideFlags: 0

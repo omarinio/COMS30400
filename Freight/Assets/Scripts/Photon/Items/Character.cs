@@ -592,6 +592,10 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
     
     IEnumerator LightsCoroutine(Switchable Item)
     {
+    
+        actualCamera.transform.GetChild(0).gameObject.SetActive(false);
+        pickUpDestinationLocal.gameObject.SetActive(false);
+        
         GameObject[] spinningLights = GameObject.FindGameObjectsWithTag("SpinningLight");
         ObjectToSeeTheLights.SetActive(true);
         yield return new WaitForSeconds(3);
@@ -606,6 +610,13 @@ public class Character : MonoBehaviourPunCallbacks, IPunOwnershipCallbacks
         yield return new WaitForSeconds(2);
         camera.transform.GetChild(1).gameObject.SetActive(false);
         //camera.transform.GetChild(0).GetComponent<CinemachineVirtualCamera>().MoveToTopOfPrioritySubqueue();
+
+        if(pickUpDestinationLocal.childCount > 0) {
+            if(pickUpDestinationLocal.GetChild(0).GetComponent<Throwable>()!= null)
+                actualCamera.transform.GetChild(0).gameObject.SetActive(true);
+        }
+         pickUpDestinationLocal.gameObject.SetActive(true);
+     
         yield break;
     }
 

@@ -38,6 +38,9 @@ public class ItemInteraction : MonoBehaviourPun
 
     private List<GameObject> interactablesInRange = new List<GameObject>();
 
+    public GameObject localRock;
+    public GameObject handGrab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -230,7 +233,6 @@ public class ItemInteraction : MonoBehaviourPun
     {
         if (cinemachineBrain.ActiveVirtualCamera as CinemachineVirtualCamera != Camera.GetComponent<CinemachineVirtualCamera>())
             return;
-
         // We can only interact with an item if the item is in reach and we are
         // not currently holding an item.
         bool canInteract = (interactablesInRange.Count > 0) && !character.HasItem();
@@ -394,11 +396,13 @@ public class ItemInteraction : MonoBehaviourPun
             if ((Input.GetKeyDown(KeyCode.E) || PoseParser.GETGestureAsString().CompareTo("B") == 0) && newBag != null)
             {
                 newBag.PrimaryInteraction(character);
+                SetPressEToNotActive();
             }
 
             if ((Input.GetKeyDown(KeyCode.E) || PoseParser.GETGestureAsString().CompareTo("B") == 0) && newSwitch != null)
             {
                 newSwitch.PrimaryInteraction(character);
+                SetPressEToNotActive();
             }
 
             if (Input.GetKeyDown(KeyCode.E) && dropBag != null)
